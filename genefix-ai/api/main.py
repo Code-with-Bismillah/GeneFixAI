@@ -4,8 +4,8 @@ from app.crisper.guide_rna import GuideRNA
 from pydantic import BaseModel
 
 app = FastAPI()
-app.include_router(mutation_detection.router, prefix="/mutation_detection")
-app.include_router(mutation_correction.router, prefix="/mutation_correction")
+app.include_router(mutation_detection, prefix="/mutation_detection")
+app.include_router(mutation_correction, prefix="/mutation_correction")
 
 guide_designer = GuideRNA("")
 
