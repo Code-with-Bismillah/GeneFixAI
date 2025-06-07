@@ -1,2 +1,3 @@
 from .detection_model import MutationDetectionModel
 from .correction_model import CorrectionTransformer
+from .awesome_model import AwesomeMutationModel

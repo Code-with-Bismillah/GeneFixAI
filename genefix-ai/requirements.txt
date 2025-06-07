@@ -109,6 +109,7 @@ pytest==8.4.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.0
 python-json-logger==3.3.0
+python-multipart==0.0.20
 pytz==2025.1
 PyYAML==6.0.2
 pyzmq==26.3.0

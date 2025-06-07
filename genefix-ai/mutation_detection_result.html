@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mutation Detection Result - GeneFix AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center">
+  <main class="w-full max-w-2xl p-8 bg-white rounded-lg shadow-lg mt-10">
+    <h2 class="text-2xl font-bold text-center text-blue-700 mb-6">Mutation Detection Result</h2>
+    <div id="results" class="mb-8"></div>
+    <a href="upload.html" class="block mt-8 text-blue-500 hover:underline">&larr; Back to Upload</a>
+  </main>
+  <script>
+    // Example: fetch and display results (replace with real API call)
+    fetch('/mutation_detection/detect_from_fasta')
+      .then(res => res.json())
+      .then(data => {
+        const resultsDiv = document.getElementById('results');
+        if (data.results) {
+          resultsDiv.innerHTML = data.results.map((r, i) => `
+            <div class='mb-4 p-4 border rounded'>
+              <div class='font-semibold'>Sequence ${i+1}:</div>
+              <div class='break-all text-xs text-gray-700'>${r.sequence}</div>
+              <div class='mt-2'>Mutations: <span class='text-red-600'>${JSON.stringify(r.mutations)}</span></div>
+            </div>
+          `).join('');
+        } else {
+          resultsDiv.innerHTML = '<span class="text-red-600">No results found.</span>';
+        }
+      });
+  </script>
+</body>
+</html>
