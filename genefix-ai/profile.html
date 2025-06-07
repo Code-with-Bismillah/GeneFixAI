@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile - GeneFix AI</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center">
+  <main class="w-full max-w-md p-8 bg-white rounded-lg shadow-lg mt-10">
+    <h2 class="text-2xl font-bold text-center text-blue-700 mb-6">User Profile</h2>
+    <div id="profile" class="mb-8"></div>
+    <button id="editBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition mb-4">Edit My Profile</button>
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-lg p-6 w-full max-w-lg relative">
+        <button id="closeEdit" class="absolute top-2 right-2 text-gray-400 text-2xl">&times;</button>
+        <h3 class="text-xl font-bold mb-4">Edit My Profile</h3>
+        <form id="editProfileForm" class="flex flex-col gap-3">
+          <label>Username<input type="text" name="username" class="mt-1 block w-full border rounded p-1" /></label>
+          <label>Name<input type="text" name="full_name" class="mt-1 block w-full border rounded p-1" /></label>
+          <label>Location<input type="text" name="country" class="mt-1 block w-full border rounded p-1" /></label>
+          <label>Picture<input type="url" name="profile_picture" class="mt-1 block w-full border rounded p-1" /></label>
+          <label>About<textarea name="about" class="mt-1 block w-full border rounded p-1"></textarea></label>
+          <h4 class="font-semibold mt-2">Your Internet Presence</h4>
+          <label>GitHub<input type="url" name="github" class="mt-1 block w-full border rounded p-1" /></label>
+          <label>LinkedIn<input type="url" name="linkedin" class="mt-1 block w-full border rounded p-1" /></label>
+          <label>Twitter<input type="url" name="twitter" class="mt-1 block w-full border rounded p-1" /></label>
+          <label>Personal Website<input type="url" name="website" class="mt-1 block w-full border rounded p-1" /></label>
+          <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition mt-2">Save</button>
+        </form>
+      </div>
+    </div>
+    <a href="index.html" class="block mt-4 text-blue-500 hover:underline">&larr; Back to Home</a>
+  </main>
+  <script>
+    function isImageData(str) {
+      return (
+        typeof str === 'string' &&
+        (str.startsWith('data:image') || str.startsWith('http://') || str.startsWith('https://'))
+      );
+    }
+    function getProfileAvatarHTML(profile, size = 80) {
+      let imgSrc = isImageData(profile.profile_picture) ? profile.profile_picture : '';
+      let initials = '';
+      if (!imgSrc) {
+        if (profile.profile_picture && /^[A-Z]{1,3}$/.test(profile.profile_picture)) {
+          initials = profile.profile_picture;
+        } else {
+          let name = profile.full_name || profile.username || profile.email || '';
+          initials = name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+        }
+      }
+      return `<div class="w-20 h-20 rounded-full mb-2 object-cover border-2 border-blue-400 flex items-center justify-center bg-blue-200 text-blue-800 font-bold" style="overflow:hidden;width:${size}px;height:${size}px;">
+        ${imgSrc
+          ? `<img src='${imgSrc}' class='w-full h-full object-cover' alt='${profile.full_name || profile.username || profile.email || "Profile Picture"}'/>`
+          : `<span style='font-size:${size/2}px;'>${initials}</span>`}
+      </div>`;
+    }
+    let userId = localStorage.getItem('user_id');
+    const profileDiv = document.getElementById('profile');
+    if (!userId) {
+      profileDiv.innerHTML = '<span class="text-red-600">No user logged in.</span>';
+    } else {
+      fetch(`/profile/${userId}`)
+        .then(res => res.json())
+        .then(p => {
+          if (p.detail) {
+            profileDiv.innerHTML = `<span class='text-red-600'>${p.detail}</span>`;
+          } else {
+            profileDiv.innerHTML = `<div class='bg-gray-100 rounded p-4 mt-4 text-left inline-block'>
+              <div><b>Name:</b> ${p.full_name || ''}</div>
+              <div><b>Username:</b> ${p.username || ''}</div>
+              <div><b>Email:</b> ${p.email}</div>
+              <div><b>Phone:</b> ${p.phone || ''}</div>
+              <div><b>Gender:</b> ${p.gender || ''}</div>
+              <div><b>Date of Birth:</b> ${p.dob || ''}</div>
+              <div><b>Country:</b> ${p.country || ''}</div>
+              <div><b>Signup Date:</b> ${p.signup_date || ''}</div>
+            </div>`;
+          }
+        });
+    }
+    let currentProfile = null;
+    function renderProfile(profile) {
+      currentProfile = profile;
+      document.getElementById('profile').innerHTML = `<div class='bg-gray-100 rounded p-4 mt-4 text-left inline-block'>
+        ${getProfileAvatarHTML(profile, 80)}
+        <div><b>Name:</b> ${profile.full_name || ''}</div>
+        <div><b>Username:</b> ${profile.username || ''}</div>
+        <div><b>Email:</b> ${profile.email}</div>
+        <div><b>Location:</b> ${profile.country || ''}</div>
+        <div><b>About:</b> ${profile.about || ''}</div>
+        <div class='mt-2'><b>GitHub:</b> <a href='${profile.github || '#'}' target='_blank' class='text-blue-600 underline'>${profile.github || ''}</a></div>
+        <div><b>LinkedIn:</b> <a href='${profile.linkedin || '#'}' target='_blank' class='text-blue-600 underline'>${profile.linkedin || ''}</a></div>
+        <div><b>Twitter:</b> <a href='${profile.twitter || '#'}' target='_blank' class='text-blue-600 underline'>${profile.twitter || ''}</a></div>
+        <div><b>Website:</b> <a href='${profile.website || '#'}' target='_blank' class='text-blue-600 underline'>${profile.website || ''}</a></div>
+      </div>`;
+    }
+    // Fetch and render profile
+    if (!userId) {
+      document.getElementById('profile').innerHTML = '<span class="text-red-600">No user logged in.</span>';
+    } else {
+      fetch(`/profile/${userId}`)
+        .then(res => res.json())
+        .then(profile => {
+          renderProfile(profile);
+          // Pre-fill edit form
+          Object.entries(profile).forEach(([k, v]) => {
+            if(document.querySelector(`#editProfileForm [name='${k}']`))
+              document.querySelector(`#editProfileForm [name='${k}']`).value = v || '';
+          });
+        });
+    }
+    // Edit modal logic
+    document.getElementById('editBtn').onclick = () => {
+      document.getElementById('editModal').classList.remove('hidden');
+    };
+    document.getElementById('closeEdit').onclick = () => {
+      document.getElementById('editModal').classList.add('hidden');
+    };
+    // Add profile picture preview and upload in edit modal
+    document.querySelector("#editProfileForm label[for='profile_picture']")?.remove();
+    const picLabel = document.createElement('label');
+    picLabel.innerHTML = `Picture <input type="file" name="profile_picture_file" accept="image/*" class="mt-1 block w-full border rounded p-1" />`;
+    document.getElementById('editProfileForm').insertBefore(picLabel, document.getElementById('editProfileForm').querySelector("textarea[name='about']"));
+    // Show preview on file select
+    picLabel.querySelector('input[type="file"]').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          document.querySelector('#profile img').src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+    document.getElementById('editProfileForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const data = {};
+      Array.from(form.elements).forEach(el => {
+        if (el.name && el.type !== 'file') data[el.name] = el.value;
+      });
+      // Handle profile picture upload (base64 for demo, or filename if not changed)
+      const fileInput = form.querySelector('input[name="profile_picture_file"]');
+      if (fileInput && fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = async function(evt) {
+          data['profile_picture'] = evt.target.result;
+          await patchProfile(data);
+        };
+        reader.readAsDataURL(file);
+        return;
+      }
+      await patchProfile(data);
+    };
+    async function patchProfile(data) {
+      const res = await fetch(`/profile/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        renderProfile(updated);
+        document.getElementById('editModal').classList.add('hidden');
+      } else {
+        alert('Failed to update profile.');
+      }
+    }
+    // Avatar for navigation/profile bar if present
+    if (userId && document.getElementById('navProfileAvatar')) {
+      fetch(`/profile/${userId}`)
+        .then(res => res.json())
+        .then(profile => {
+          document.getElementById('navProfileAvatar').innerHTML = getProfileAvatarHTML(profile, 32);
+        });
+    }
+  </script>
+</body>
+</html>

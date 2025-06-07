@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upload Genome - GeneFix AI</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+  <title>Login - GeneFix AI</title>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center">
   <header class="w-full bg-blue-700 py-6 mb-8 flex flex-col items-center relative">
@@ -22,50 +22,47 @@
       <a href="login.html" class="text-white font-semibold underline">Sign In</a>
     </div>
   </header>
-  <main class="w-full max-w-lg p-8 bg-white rounded-lg shadow-lg mt-10">
-    <h2 class="text-2xl font-bold text-center text-blue-700 mb-6">Upload Genome</h2>
-    <form id="uploadForm" class="flex flex-col gap-4" enctype="multipart/form-data">
+  <main class="w-full max-w-md p-8 bg-white rounded-lg shadow-lg mt-10">
+    <h2 class="text-2xl font-bold text-center text-blue-700 mb-6">Login</h2>
+    <form id="loginForm" class="flex flex-col gap-4">
       <label class="block">
-        <span class="text-gray-700">FASTA File</span>
-        <input type="file" name="file" accept=".fasta,.fa" required class="mt-1 block w-full" />
+        <span class="text-gray-700">Email</span>
+        <input type="email" name="email" required class="mt-1 block w-full" />
       </label>
       <label class="block">
-        <span class="text-gray-700">Species</span>
-        <select name="species" class="mt-1 block w-full">
-          <option value="human">Human</option>
-          <option value="mouse">Mouse</option>
-          <option value="zebrafish">Zebrafish</option>
-          <option value="drosophila">Drosophila</option>
-        </select>
+        <span class="text-gray-700">Password</span>
+        <input type="password" name="password" required class="mt-1 block w-full" />
       </label>
-      <label class="block">
-        <span class="text-gray-700">Sample Name</span>
-        <input type="text" name="sample_name" class="mt-1 block w-full" />
-      </label>
-      <button type="submit" class="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Upload</button>
+      <button type="submit" class="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Login</button>
     </form>
     <div id="result" class="mt-6 text-center"></div>
-    <a href="index.html" class="block mt-8 text-blue-500 hover:underline">&larr; Back to Home</a>
+    <a href="signup.html" class="block mt-4 text-blue-500 hover:underline">Don't have an account? Sign Up</a>
+    <a href="index.html" class="block mt-4 text-blue-500 hover:underline">&larr; Back to Home</a>
   </main>
   <script>
-    document.getElementById('uploadForm').onsubmit = async function(e) {
+    document.getElementById('loginForm').onsubmit = async function(e) {
       e.preventDefault();
       const form = e.target;
-      const data = new FormData(form);
-      const res = await fetch('/upload_fasta', {
+      const data = {
+        email: form.email.value,
+        password: form.password.value
+      };
+      const res = await fetch('/auth/login', {
         method: 'POST',
-        body: data
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
       });
       const resultDiv = document.getElementById('result');
       if (res.ok) {
         const json = await res.json();
-        resultDiv.innerHTML = `<span class='text-green-600'>Upload successful! Sequences found: ${json.num_sequences}</span>`;
+        // Save user_id to localStorage for profile page
+        localStorage.setItem('user_id', json.profile.user_id);
+        resultDiv.innerHTML = `<span class='text-green-600'>Login successful! Redirecting to profile...</span>`;
+        setTimeout(()=>window.location.href='profile.html', 1000);
       } else {
-        resultDiv.innerHTML = `<span class='text-red-600'>Upload failed: ${(await res.json()).detail}</span>`;
+        resultDiv.innerHTML = `<span class='text-red-600'>Login failed: ${(await res.json()).detail}</span>`;
       }
     }
-  </script>
-  <script>
     function showUserProfileBar() {
       const userId = localStorage.getItem('user_id');
       const userProfileBar = document.getElementById('userProfileBar');
@@ -98,9 +95,7 @@
       localStorage.removeItem('user_id');
       window.location.reload();
     };
-  </script>
-  <script>
-function isImageData(str) {
+    function isImageData(str) {
   return (
     typeof str === 'string' &&
     (str.startsWith('data:image') || str.startsWith('http://') || str.startsWith('https://'))
@@ -132,6 +127,6 @@ if (userId && document.getElementById('navProfileAvatar')) {
       document.getElementById('navProfileAvatar').innerHTML = getProfileAvatarHTML(profile, 32);
     });
 }
-</script>
+  </script>
 </body>
 </html>

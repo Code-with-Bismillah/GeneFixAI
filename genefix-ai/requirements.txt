@@ -9,6 +9,7 @@ asttokens==3.0.0
 async-lru==2.0.5
 attrs==25.3.0
 babel==2.17.0
+bcrypt==4.3.0
 beautifulsoup4==4.13.3
 biopython==1.85
 bleach==6.2.0
@@ -90,6 +91,7 @@ packaging==24.2
 pandas==2.2.3
 pandocfilters==1.5.1
 parso==0.8.4
+passlib==1.7.4
 pexpect==4.9.0
 pillow==11.1.0
 platformdirs==4.3.6

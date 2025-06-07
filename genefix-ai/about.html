@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upload Genome - GeneFix AI</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+  <title>About & Methodology - GeneFix AI</title>
+       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center">
   <header class="w-full bg-blue-700 py-6 mb-8 flex flex-col items-center relative">
@@ -22,49 +23,38 @@
       <a href="login.html" class="text-white font-semibold underline">Sign In</a>
     </div>
   </header>
-  <main class="w-full max-w-lg p-8 bg-white rounded-lg shadow-lg mt-10">
-    <h2 class="text-2xl font-bold text-center text-blue-700 mb-6">Upload Genome</h2>
-    <form id="uploadForm" class="flex flex-col gap-4" enctype="multipart/form-data">
-      <label class="block">
-        <span class="text-gray-700">FASTA File</span>
-        <input type="file" name="file" accept=".fasta,.fa" required class="mt-1 block w-full" />
-      </label>
-      <label class="block">
-        <span class="text-gray-700">Species</span>
-        <select name="species" class="mt-1 block w-full">
-          <option value="human">Human</option>
-          <option value="mouse">Mouse</option>
-          <option value="zebrafish">Zebrafish</option>
-          <option value="drosophila">Drosophila</option>
-        </select>
-      </label>
-      <label class="block">
-        <span class="text-gray-700">Sample Name</span>
-        <input type="text" name="sample_name" class="mt-1 block w-full" />
-      </label>
-      <button type="submit" class="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Upload</button>
-    </form>
-    <div id="result" class="mt-6 text-center"></div>
+  <main class="w-full max-w-3xl p-8 bg-white rounded-lg shadow-lg mt-10">
+    <h2 class="text-3xl font-bold text-blue-700 mb-6 text-center">About & Methodology</h2>
+    <section class="mb-8">
+      <h3 class="text-xl font-semibold mb-2">Methodology</h3>
+      <ol class="list-decimal list-inside text-gray-700 space-y-2">
+        <li><b>Data Collection and Preprocessing:</b> Genome data is collected from public biological databases (e.g., NCBI, 2021) and preprocessed using bioinformatics tools to ensure high-quality, annotated sequences.</li>
+        <li><b>Mutation Detection Using ML Models:</b> Machine learning models (Libbrecht & Noble, 2015) detect SNPs, insertions, deletions, and other mutations by comparing subject DNA to reference genomes.</li>
+        <li><b>Guide RNA Design:</b> The system designs optimal gRNAs using a hybrid of traditional rules (PAM, GC content) and neural network predictions (J. Doench et al., 2014, 2016) to maximize precision and minimize off-targets.</li>
+        <li><b>Simulation and Real-Time Monitoring:</b> In-silico CRISPR edit simulations (J. Doench et al., 2014) are visualized for users. The system can integrate with lab sensors for real-time feedback to improve AI predictions.</li>
+        <li><b>System Architecture and User Interface:</b> GeneFix-AI is a modular web app with a Python/TensorFlow backend and a modern HTML/CSS/JS frontend. Users can upload genomes, receive mutation reports, and download gRNAs.</li>
+        <li><b>Validation:</b> The system is validated using benchmark CRISPR datasets and simulated experiments (Moreno et al., 2020), and refined with user feedback.</li>
+        <li><b>AI-Powered Mutation Detection:</b> Deep learning models (Angermueller et al., 2016) analyze DNA, classify mutation-prone regions, and predict genetic alterations.</li>
+        <li><b>Guide RNA Design (AI):</b> AI-based algorithms generate highly specific gRNAs, minimizing off-target effects (J. G. Doench et al., 2016).</li>
+        <li><b>Real-Time Monitoring and Correction:</b> The system tracks CRISPR-Cas9 edits in real time (Kleinstiver et al., 2016), using AI to suggest adjustments for optimal outcomes.</li>
+        <li><b>User Interface and Interaction:</b> Designed for accessibility, the UI allows researchers to upload data, run analyses, and receive actionable results (Norman, 2013).</li>
+      </ol>
+    </section>
+    <section class="mb-8">
+      <h3 class="text-xl font-semibold mb-2">References</h3>
+      <ul class="list-disc list-inside text-gray-600 text-sm space-y-1">
+        <li>J. G. Doench et al., 2014, 2016</li>
+        <li>Libbrecht & Noble, 2015</li>
+        <li>NCBI, 2021</li>
+        <li>Moreno et al., 2020</li>
+        <li>Angermueller et al., 2016</li>
+        <li>Kleinstiver et al., 2016</li>
+        <li>Norman, 2013</li>
+        <li>Team, 2021</li>
+      </ul>
+    </section>
     <a href="index.html" class="block mt-8 text-blue-500 hover:underline">&larr; Back to Home</a>
   </main>
-  <script>
-    document.getElementById('uploadForm').onsubmit = async function(e) {
-      e.preventDefault();
-      const form = e.target;
-      const data = new FormData(form);
-      const res = await fetch('/upload_fasta', {
-        method: 'POST',
-        body: data
-      });
-      const resultDiv = document.getElementById('result');
-      if (res.ok) {
-        const json = await res.json();
-        resultDiv.innerHTML = `<span class='text-green-600'>Upload successful! Sequences found: ${json.num_sequences}</span>`;
-      } else {
-        resultDiv.innerHTML = `<span class='text-red-600'>Upload failed: ${(await res.json()).detail}</span>`;
-      }
-    }
-  </script>
   <script>
     function showUserProfileBar() {
       const userId = localStorage.getItem('user_id');

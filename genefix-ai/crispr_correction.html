@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upload Genome - GeneFix AI</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+  <title>CRISPR Correction Tool - GeneFix AI</title>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center">
   <header class="w-full bg-blue-700 py-6 mb-8 flex flex-col items-center relative">
@@ -22,46 +22,46 @@
       <a href="login.html" class="text-white font-semibold underline">Sign In</a>
     </div>
   </header>
-  <main class="w-full max-w-lg p-8 bg-white rounded-lg shadow-lg mt-10">
-    <h2 class="text-2xl font-bold text-center text-blue-700 mb-6">Upload Genome</h2>
-    <form id="uploadForm" class="flex flex-col gap-4" enctype="multipart/form-data">
+  <main class="w-full max-w-2xl p-8 bg-white rounded-lg shadow-lg mt-10">
+    <h2 class="text-2xl font-bold text-center text-purple-700 mb-6">CRISPR Correction Tool</h2>
+    <form id="crisprForm" class="flex flex-col gap-4 mb-6">
       <label class="block">
-        <span class="text-gray-700">FASTA File</span>
-        <input type="file" name="file" accept=".fasta,.fa" required class="mt-1 block w-full" />
+        <span class="text-gray-700">DNA Sequence</span>
+        <textarea name="sequence" required class="mt-1 block w-full border rounded p-2" rows="3"></textarea>
       </label>
       <label class="block">
-        <span class="text-gray-700">Species</span>
-        <select name="species" class="mt-1 block w-full">
-          <option value="human">Human</option>
-          <option value="mouse">Mouse</option>
-          <option value="zebrafish">Zebrafish</option>
-          <option value="drosophila">Drosophila</option>
-        </select>
+        <span class="text-gray-700">Mutation Position</span>
+        <input type="number" name="mutation_pos" required class="mt-1 block w-full" />
       </label>
-      <label class="block">
-        <span class="text-gray-700">Sample Name</span>
-        <input type="text" name="sample_name" class="mt-1 block w-full" />
-      </label>
-      <button type="submit" class="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Upload</button>
+      <button type="submit" class="bg-purple-600 text-white py-2 rounded hover:bg-purple-700 transition">Suggest Correction</button>
     </form>
-    <div id="result" class="mt-6 text-center"></div>
+    <div id="result" class="mb-8"></div>
     <a href="index.html" class="block mt-8 text-blue-500 hover:underline">&larr; Back to Home</a>
   </main>
   <script>
-    document.getElementById('uploadForm').onsubmit = async function(e) {
+    document.getElementById('crisprForm').onsubmit = async function(e) {
       e.preventDefault();
       const form = e.target;
-      const data = new FormData(form);
-      const res = await fetch('/upload_fasta', {
+      const data = {
+        sequence: form.sequence.value,
+        mutation_pos: parseInt(form.mutation_pos.value)
+      };
+      const res = await fetch('/mutation_correction/suggest_correction', {
         method: 'POST',
-        body: data
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
       });
       const resultDiv = document.getElementById('result');
       if (res.ok) {
         const json = await res.json();
-        resultDiv.innerHTML = `<span class='text-green-600'>Upload successful! Sequences found: ${json.num_sequences}</span>`;
+        resultDiv.innerHTML = `<div class='p-4 border rounded mb-2'>
+          <div><b>Suggested gRNA:</b> <span class='text-purple-700'>${json.suggested_guide}</span></div>
+          <div><b>On-target score:</b> ${json.on_target_score}</div>
+          <div><b>Off-target score:</b> ${json.off_target_score}</div>
+          <div><b>Corrected Sequence:</b> <span class='break-all text-xs text-green-700'>${json.corrected_sequence}</span></div>
+        </div>`;
       } else {
-        resultDiv.innerHTML = `<span class='text-red-600'>Upload failed: ${(await res.json()).detail}</span>`;
+        resultDiv.innerHTML = `<span class='text-red-600'>Correction failed: ${(await res.json()).detail}</span>`;
       }
     }
   </script>
