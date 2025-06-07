@@ -1,7 +1,9 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, Body
+from fastapi import FastAPI, UploadFile, File, HTTPException, Body, Query
 from fastapi.responses import FileResponse, JSONResponse
-from api.routes import mutation_detection, mutation_correction
+from api.routes.mutation_detection import router as mutation_detection_router
+from api.routes.mutation_correction import router as mutation_correction_router
 from api.routes.simulate_cas9 import router as simulate_cas9_router
+from api.routes.__init__ import router as sequence_tools_router
 from app.crisper.guide_rna import GuideRNA
 from app.data_pipeline.genome_parser import GenomeParser
 from pydantic import BaseModel
@@ -17,10 +19,12 @@ from passlib.hash import bcrypt
 from datetime import datetime
 import uuid
 
-app = FastAPI()
-app.include_router(mutation_detection, prefix="/mutation_detection")
-app.include_router(mutation_correction, prefix="/mutation_correction")
+# Enable FastAPI docs and OpenAPI schema for development
+app = FastAPI(docs_url="/docs", redoc_url="/redoc", openapi_url="/openapi.json")
+app.include_router(mutation_detection_router, prefix="/mutation_detection")
+app.include_router(mutation_correction_router, prefix="/mutation_correction")
 app.include_router(simulate_cas9_router, prefix="/crispr")
+app.include_router(sequence_tools_router, prefix="/sequence_tools")
 
 guide_designer = GuideRNA("")
 
@@ -37,9 +41,10 @@ app.mount("/static", StaticFiles(directory="."), name="static")
 # Serve HTML files at root (e.g., /index.html, /upload.html, etc.)
 @app.get("/{filename}", response_class=FileResponse)
 async def serve_html(filename: str):
-    if os.path.exists(filename):
+    # Only serve if the file exists and is a file (not a directory)
+    if os.path.isfile(filename):
         return FileResponse(filename)
-    return FileResponse("index.html")
+    return JSONResponse(status_code=404, content={"detail": "Not found"})
 
 # Serve index.html at root
 @app.get("/", response_class=FileResponse)
@@ -177,3 +182,33 @@ async def update_profile(user_id: str, data: dict = Body(...)):
     save_users(users)
     profile = {k: v for k, v in user.items() if k != "password"}
     return profile
+
+@app.get("/biodata/ncbi_entrez_search")
+def ncbi_entrez_search(term: str = Query(..., description="Gene/protein/sequence search term"), db: str = Query("gene", description="NCBI database: gene, protein, nucleotide, etc.")):
+    """Search NCBI Entrez for genes, proteins, or sequences."""
+    url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
+    params = {"db": db, "term": term, "retmode": "json"}
+    r = requests.get(url, params=params)
+    if r.status_code != 200:
+        raise HTTPException(status_code=404, detail="NCBI Entrez search failed")
+    return r.json()
+
+@app.get("/biodata/ensembl_gene")
+def ensembl_gene(gene_id: str = Query(..., description="Ensembl gene ID (e.g. ENSG00000139618)")):
+    """Fetch gene annotation from Ensembl REST API."""
+    url = f"https://rest.ensembl.org/lookup/id/{gene_id}?expand=1"
+    headers = {"Content-Type": "application/json"}
+    r = requests.get(url, headers=headers)
+    if r.status_code != 200:
+        raise HTTPException(status_code=404, detail="Gene not found in Ensembl")
+    return r.json()
+
+@app.get("/biodata/uniprot_search")
+def uniprot_search(query: str = Query(..., description="Protein search query")):
+    """Search UniProt for protein-level information."""
+    url = "https://rest.uniprot.org/uniprotkb/search"
+    params = {"query": query, "format": "json", "size": 5}
+    r = requests.get(url, params=params)
+    if r.status_code != 200:
+        raise HTTPException(status_code=404, detail="UniProt search failed")
+    return r.json()

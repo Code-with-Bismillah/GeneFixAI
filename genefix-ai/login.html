@@ -12,30 +12,30 @@
   <header class="w-full bg-blue-700 py-6 mb-8 flex flex-col items-center relative">
     <h1 class="text-4xl font-bold text-center text-white">GeneFix AI</h1>
     <p class="text-center text-blue-100 mt-2">AI-powered Genome Mutation Detection & Correction</p>
-    <div id="userProfileBar" class="absolute right-8 top-6 flex items-center gap-3 hidden">
+    <div id="userProfileBar" class="absolute right-4 top-4 flex items-center gap-3 hidden">
       <img id="userPhoto" src="avatar.png" alt="Profile" class="w-10 h-10 rounded-full border-2 border-white object-cover" />
       <span id="userName" class="text-white font-semibold"></span>
       <a href="profile.html" class="text-blue-200 underline text-sm ml-2">Profile</a>
       <button id="logoutBtn" class="ml-2 px-2 py-1 bg-blue-900 text-white rounded text-xs">Logout</button>
     </div>
-    <div id="signInBar" class="absolute right-8 top-6 flex items-center gap-3">
+    <div id="signInBar" class="absolute right-4 top-4 flex items-center gap-3">
       <a href="login.html" class="text-white font-semibold underline">Sign In</a>
     </div>
   </header>
-  <main class="w-full max-w-md p-8 bg-white rounded-lg shadow-lg mt-10">
+  <main class="w-full max-w-md p-4 sm:p-8 bg-white rounded-lg shadow-lg mt-10 flex flex-col items-center">
     <h2 class="text-2xl font-bold text-center text-blue-700 mb-6">Login</h2>
-    <form id="loginForm" class="flex flex-col gap-4">
-      <label class="block">
+    <form id="loginForm" class="flex flex-col gap-4 w-full mb-6">
+      <label class="block w-full">
         <span class="text-gray-700">Email</span>
-        <input type="email" name="email" required class="mt-1 block w-full" />
+        <input type="email" name="email" required class="mt-1 block w-full border rounded p-2" />
       </label>
-      <label class="block">
+      <label class="block w-full">
         <span class="text-gray-700">Password</span>
-        <input type="password" name="password" required class="mt-1 block w-full" />
+        <input type="password" name="password" required class="mt-1 block w-full border rounded p-2" />
       </label>
-      <button type="submit" class="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Login</button>
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full sm:w-auto">Login</button>
     </form>
-    <div id="result" class="mt-6 text-center"></div>
+    <div id="result" class="mt-6 text-center w-full"></div>
     <a href="signup.html" class="block mt-4 text-blue-500 hover:underline">Don't have an account? Sign Up</a>
     <a href="index.html" class="block mt-4 text-blue-500 hover:underline">&larr; Back to Home</a>
   </main>

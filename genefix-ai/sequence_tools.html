@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sequence Tools - GeneFix AI</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center">
+  <main class="w-full max-w-2xl p-4 sm:p-8 bg-white rounded-lg shadow-lg mt-10 flex flex-col items-center">
+    <h2 class="text-2xl font-bold text-center text-blue-700 mb-6">DNA/RNA/Protein Sequence Tools</h2>
+    <form id="seqToolsForm" class="flex flex-col gap-4 w-full mb-6">
+      <label class="block">
+        <span class="text-gray-700">Sequence (DNA or RNA)</span>
+        <textarea name="sequence" required class="mt-1 block w-full border rounded p-2" rows="3"></textarea>
+      </label>
+      <label class="block">
+        <span class="text-gray-700">ORF Minimum Protein Length</span>
+        <input type="number" name="min_protein_length" value="30" class="mt-1 block w-full border rounded p-1" />
+      </label>
+      <div class="flex flex-wrap gap-2 w-full">
+        <button type="button" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="runTool('gc_content')">GC Content</button>
+        <button type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" onclick="runTool('reverse_complement')">Reverse Complement</button>
+        <button type="button" class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700" onclick="runTool('transcribe')">Transcribe (DNA→mRNA)</button>
+        <button type="button" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700" onclick="runTool('translate')">Translate (mRNA→Protein)</button>
+        <button type="button" class="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700" onclick="runTool('orf_finder')">Find ORFs</button>
+      </div>
+    </form>
+    <div id="result" class="mt-6 text-left w-full"></div>
+    <a href="index.html" class="block mt-8 text-blue-500 hover:underline">&larr; Back to Home</a>
+  </main>
+  <script>
+    async function runTool(tool) {
+      const form = document.getElementById('seqToolsForm');
+      const seq = form.sequence.value.trim();
+      const minLen = form.min_protein_length.value;
+      if (!seq) return;
+      let url = `/sequence_tools/${tool}`;
+      let body = { sequence: seq };
+      if (tool === 'orf_finder') body.min_protein_length = minLen;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const resultDiv = document.getElementById('result');
+      if (res.ok) {
+        const json = await res.json();
+        if (tool === 'gc_content') {
+          resultDiv.innerHTML = `<b>GC Content:</b> ${json.gc_content}%`;
+          showAlert('GC Content calculated!', 'success');
+        } else if (tool === 'reverse_complement') {
+          resultDiv.innerHTML = `<b>Reverse Complement:</b> <span class='break-all'>${json.reverse_complement}</span>`;
+          showAlert('Reverse complement generated!', 'success');
+        } else if (tool === 'transcribe') {
+          resultDiv.innerHTML = `<b>mRNA:</b> <span class='break-all'>${json.mRNA}</span>`;
+          showAlert('Transcription complete!', 'success');
+        } else if (tool === 'translate') {
+          resultDiv.innerHTML = `<b>Protein:</b> <span class='break-all'>${json.protein}</span>`;
+          showAlert('Translation complete!', 'success');
+        } else if (tool === 'orf_finder') {
+          if (json.orfs && json.orfs.length > 0) {
+            resultDiv.innerHTML = `<b>ORFs Found:</b><br>` + json.orfs.map((o, i) => `ORF ${i+1}: <b>Start:</b> ${o[0]}, <b>End:</b> ${o[1]}, <b>Protein:</b> <span class='break-all'>${o[2]}</span>`).join('<br><br>');
+            showAlert('ORFs found!', 'success');
+          } else {
+            resultDiv.innerHTML = '<span class="text-red-600">No ORFs found.</span>';
+            showAlert('No ORFs found.', 'error');
+          }
+        }
+      } else {
+        resultDiv.innerHTML = `<span class='text-red-600'>Error: ${(await res.json()).detail || 'Failed to process.'}</span>`;
+        showAlert('Error processing sequence.', 'error');
+      }
+    }
+    // Notification/alert function
+    function showAlert(message, type) {
+      let alert = document.createElement('div');
+      alert.className = `fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg animate__animated animate__fadeInDown ${type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`;
+      alert.innerText = message;
+      document.body.appendChild(alert);
+      setTimeout(() => {
+        alert.classList.add('animate__fadeOutUp');
+        setTimeout(() => alert.remove(), 800);
+      }, 2200);
+    }
+  </script>
+</body>
+</html>

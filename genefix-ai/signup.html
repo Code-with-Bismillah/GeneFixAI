@@ -12,19 +12,19 @@
   <header class="w-full bg-blue-700 py-6 mb-8 flex flex-col items-center relative">
     <h1 class="text-4xl font-bold text-center text-white">GeneFix AI</h1>
     <p class="text-center text-blue-100 mt-2">AI-powered Genome Mutation Detection & Correction</p>
-    <div id="userProfileBar" class="absolute right-8 top-6 flex items-center gap-3 hidden">
+    <div id="userProfileBar" class="absolute right-4 top-4 flex items-center gap-3 hidden">
       <img id="userPhoto" src="avatar.png" alt="Profile" class="w-10 h-10 rounded-full border-2 border-white object-cover" />
       <span id="userName" class="text-white font-semibold"></span>
       <a href="profile.html" class="text-blue-200 underline text-sm ml-2">Profile</a>
       <button id="logoutBtn" class="ml-2 px-2 py-1 bg-blue-900 text-white rounded text-xs">Logout</button>
     </div>
-    <div id="signInBar" class="absolute right-8 top-6 flex items-center gap-3">
+    <div id="signInBar" class="absolute right-4 top-4 flex items-center gap-3">
       <a href="login.html" class="text-white font-semibold underline">Sign In</a>
     </div>
   </header>
-  <main class="w-full max-w-md p-8 bg-white rounded-lg shadow-lg mt-10">
+  <main class="w-full max-w-md p-4 sm:p-8 bg-white rounded-lg shadow-lg mt-10 flex flex-col items-center">
     <h2 class="text-2xl font-bold text-center text-blue-700 mb-6">Sign Up</h2>
-    <form id="signupForm" class="flex flex-col gap-4" enctype="multipart/form-data">
+    <form id="signupForm" class="flex flex-col gap-4 w-full mb-6" enctype="multipart/form-data">
       <label class="block">
         <span class="text-gray-700">Full Name</span>
         <input type="text" name="full_name" class="mt-1 block w-full" required />
@@ -74,58 +74,81 @@
         <input type="checkbox" name="agreed_terms" required />
         <span class="text-gray-700 text-sm">I agree to the <a href="about.html" class="text-blue-500 underline" target="_blank">Terms and Conditions</a></span>
       </label>
-      <button type="submit" class="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Sign Up</button>
+      <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full sm:w-auto">Sign Up</button>
     </form>
-    <div id="result" class="mt-6 text-center"></div>
-    <div id="profile" class="mt-6 text-center hidden"></div>
+    <div id="result" class="mt-6 text-center w-full"></div>
     <a href="login.html" class="block mt-4 text-blue-500 hover:underline">Already have an account? Login</a>
     <a href="index.html" class="block mt-4 text-blue-500 hover:underline">&larr; Back to Home</a>
   </main>
   <script>
     document.getElementById('signupForm').onsubmit = async function(e) {
-      e.preventDefault();
-      const form = e.target;
-      const formData = new FormData(form);
-      // Convert FormData to JSON, handle file upload
-      const data = {};
-      formData.forEach((value, key) => {
-        if (key === 'profile_picture' && value instanceof File && value.size > 0) {
-          data[key] = value.name;
-        } else if (key === 'agreed_terms') {
-          data[key] = true;
-        } else {
-          data[key] = value;
-        }
-      });
-      const res = await fetch('/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      const resultDiv = document.getElementById('result');
-      const profileDiv = document.getElementById('profile');
-      if (res.ok) {
-        const json = await res.json();
-        resultDiv.innerHTML = `<span class='text-green-600'>Signup successful!</span>`;
-        // Show user profile
-        const p = json.profile;
-        profileDiv.innerHTML = `<div class='bg-gray-100 rounded p-4 mt-4 text-left inline-block'>
-          <div><b>Name:</b> ${p.full_name || ''}</div>
-          <div><b>Username:</b> ${p.username || ''}</div>
-          <div><b>Email:</b> ${p.email}</div>
-          <div><b>Phone:</b> ${p.phone || ''}</div>
-          <div><b>Gender:</b> ${p.gender || ''}</div>
-          <div><b>Date of Birth:</b> ${p.dob || ''}</div>
-          <div><b>Country:</b> ${p.country || ''}</div>
-          <div><b>Signup Date:</b> ${p.signup_date || ''}</div>
-        </div>`;
-        profileDiv.classList.remove('hidden');
-        // Optionally redirect after a delay
-        setTimeout(()=>window.location.href='login.html', 4000);
-      } else {
-        profileDiv.classList.add('hidden');
-        resultDiv.innerHTML = `<span class='text-red-600'>Signup failed: ${(await res.json()).detail}</span>`;
+  e.preventDefault();
+  const form = e.target;
+  const data = {};
+  // Collect all fields
+  data.full_name = form.full_name.value;
+  data.username = form.username.value;
+  data.email = form.email.value;
+  data.password = form.password.value;
+  data.confirm_password = form.confirm_password.value;
+  data.phone = form.phone.value;
+  data.gender = form.gender.value;
+  data.dob = form.dob.value;
+  data.country = form.country.value;
+  data.agreed_terms = form.agreed_terms.checked;
+  // Handle profile_picture (optional)
+  const fileInput = form.profile_picture;
+  if (fileInput && fileInput.files && fileInput.files[0]) {
+    // Convert image to base64 string
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = async function(evt) {
+      data.profile_picture = evt.target.result;
+      await submitSignup(data);
+    };
+    reader.readAsDataURL(file);
+    return;
+  } else {
+    data.profile_picture = '';
+    await submitSignup(data);
+  }
+};
+
+async function submitSignup(data) {
+  const res = await fetch('/auth/signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  const resultDiv = document.getElementById('result');
+  if (res.ok) {
+    // Save profile picture to localStorage for navbar use
+    try {
+      const json = await res.json();
+      if (json.profile && json.profile.profile_picture) {
+        localStorage.setItem('profile_picture', json.profile.profile_picture);
       }
+    } catch {}
+    resultDiv.innerHTML = `<span class='text-green-600'>Signup successful! You can now log in.</span>`;
+    showAlert('Signup successful! Please log in.', 'success');
+    setTimeout(() => window.location.href = 'login.html', 1500);
+  } else {
+    let detail = 'Unknown error';
+    try { detail = (await res.json()).detail; } catch {}
+    resultDiv.innerHTML = `<span class='text-red-600'>Signup failed: ${detail}</span>`;
+    showAlert('Signup failed. Please check your details.', 'error');
+  }
+}
+// Notification/alert function
+    function showAlert(message, type) {
+      let alert = document.createElement('div');
+      alert.className = `fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg animate__animated animate__fadeInDown ${type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`;
+      alert.innerText = message;
+      document.body.appendChild(alert);
+      setTimeout(() => {
+        alert.classList.add('animate__fadeOutUp');
+        setTimeout(() => alert.remove(), 800);
+      }, 2200);
     }
     function showUserProfileBar() {
       const userId = localStorage.getItem('user_id');
@@ -139,11 +162,25 @@
               userProfileBar.classList.remove('hidden');
               signInBar.classList.add('hidden');
               document.getElementById('userName').textContent = profile.full_name || profile.username || profile.email;
-              let photo = profile.profile_picture && profile.profile_picture !== 'undefined' && profile.profile_picture !== '' ? profile.profile_picture : 'avatar.png';
-              if (photo && !photo.startsWith('http') && !photo.startsWith('/')) {
-                photo = './' + photo;
+              // Use localStorage profile_picture if available
+              let photo = localStorage.getItem('profile_picture') || profile.profile_picture || '';
+              if (photo && photo !== 'undefined' && photo !== '') {
+                document.getElementById('userPhoto').src = photo;
+              } else {
+                // Show initials if no photo
+                let name = profile.full_name || profile.username || profile.email || '';
+                let initials = name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+                document.getElementById('userPhoto').src = '';
+                document.getElementById('userPhoto').alt = initials;
+                document.getElementById('userPhoto').style.background = '#bfdbfe';
+                document.getElementById('userPhoto').style.color = '#1e40af';
+                document.getElementById('userPhoto').style.display = 'flex';
+                document.getElementById('userPhoto').style.alignItems = 'center';
+                document.getElementById('userPhoto').style.justifyContent = 'center';
+                document.getElementById('userPhoto').style.fontWeight = 'bold';
+                document.getElementById('userPhoto').style.fontSize = '1.2rem';
+                document.getElementById('userPhoto').value = initials;
               }
-              document.getElementById('userPhoto').src = photo;
             } else {
               userProfileBar.classList.add('hidden');
               signInBar.classList.remove('hidden');

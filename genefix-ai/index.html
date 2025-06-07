@@ -3,110 +3,372 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+  <title>GeneFix AI - Genome Mutation Detection & CRISPR Correction</title>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-  <title>GeneFix AI</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center">
-  <header class="w-full bg-blue-700 py-6 mb-8 flex flex-col items-center relative">
-    <h1 class="text-4xl font-bold text-center text-white">GeneFix AI</h1>
-    <p class="text-center text-blue-100 mt-2">AI-powered Genome Mutation Detection & Correction</p>
-    <div id="userProfileBar" class="absolute right-8 top-6 flex items-center gap-3 hidden">
-      <div id="navProfileAvatar"></div>
-      <span id="userName" class="text-white font-semibold"></span>
-      <a href="profile.html" class="text-blue-200 underline text-sm ml-2">Profile</a>
-      <button id="logoutBtn" class="ml-2 px-2 py-1 bg-blue-900 text-white rounded text-xs">Logout</button>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+  <!-- Navbar -->
+  <nav class="w-full bg-blue-800 shadow-lg sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center gap-3">
+          <a href="index.html" class="flex items-center gap-2">
+            <span class="text-2xl font-bold text-white">GeneFix AI</span>
+          </a>
+        </div>
+        <div class="hidden md:flex gap-4 items-center">
+          <a href="index.html" class="text-white hover:text-blue-200 px-3 py-2 rounded transition">Home</a>
+          <a href="upload.html" class="text-white hover:text-blue-200 px-3 py-2 rounded transition">Upload</a>
+          <a href="mutation_detection_result.html" class="text-white hover:text-blue-200 px-3 py-2 rounded transition">Mutation Detection</a>
+          <a href="crispr_correction.html" class="text-white hover:text-blue-200 px-3 py-2 rounded transition">CRISPR Tool</a>
+          <a href="sequence_tools.html" class="text-white hover:text-blue-200 px-3 py-2 rounded transition">Sequence Tools</a>
+          <a href="about.html" class="text-white hover:text-blue-200 px-3 py-2 rounded transition">About</a>
+          <a href="/docs" class="text-white hover:text-yellow-300 px-3 py-2 rounded transition" target="_blank">API Docs</a>
+        </div>
+        <!-- User controls in navbar -->
+        <div class="flex items-center gap-3">
+          <div id="userProfileBar" class="flex items-center gap-3 hidden">
+            <img id="userPhoto" src="avatar.png" alt="Profile" class="w-8 h-8 rounded-full border-2 border-white object-cover" />
+            <span id="userName" class="text-white font-semibold"></span>
+            <a href="profile.html" class="text-blue-200 underline text-sm ml-2">Profile</a>
+            <button id="logoutBtn" class="ml-2 px-2 py-1 bg-blue-900 text-white rounded text-xs">Logout</button>
+          </div>
+          <div id="signInBar" class="flex items-center gap-3">
+            <a href="login.html" class="text-white font-semibold underline">Sign In</a>
+          </div>
+          <!-- Mobile menu button -->
+          <div class="md:hidden flex items-center ml-2">
+            <button id="navbarToggle" class="text-white focus:outline-none focus:ring-2 focus:ring-white p-2 rounded">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-    <div id="signInBar" class="absolute right-8 top-6 flex items-center gap-3">
-      <a href="login.html" class="text-white font-semibold underline">Sign In</a>
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="md:hidden hidden bg-blue-900">
+      <a href="index.html" class="block text-white px-4 py-2 hover:bg-blue-700">Home</a>
+      <a href="upload.html" class="block text-white px-4 py-2 hover:bg-blue-700">Upload</a>
+      <a href="mutation_detection_result.html" class="block text-white px-4 py-2 hover:bg-blue-700">Mutation Detection</a>
+      <a href="crispr_correction.html" class="block text-white px-4 py-2 hover:bg-blue-700">CRISPR Tool</a>
+      <a href="sequence_tools.html" class="block text-white px-4 py-2 hover:bg-blue-700">Sequence Tools</a>
+      <a href="about.html" class="block text-white px-4 py-2 hover:bg-blue-700">About</a>
+      <a href="/docs" class="block text-yellow-300 px-4 py-2 hover:bg-blue-700" target="_blank">API Docs</a>
+      <!-- User controls in mobile menu -->
+      <div class="border-t border-blue-700 my-2"></div>
+      <div id="userProfileBarMobile" class="flex items-center gap-2 px-4 py-2 hidden">
+        <img id="userPhotoMobile" src="avatar.png" alt="Profile" class="w-7 h-7 rounded-full border-2 border-white object-cover" />
+        <span id="userNameMobile" class="text-white font-semibold"></span>
+        <a href="profile.html" class="text-blue-200 underline text-xs ml-2">Profile</a>
+        <button id="logoutBtnMobile" class="ml-2 px-2 py-1 bg-blue-900 text-white rounded text-xs">Logout</button>
+      </div>
+      <div id="signInBarMobile" class="flex items-center gap-2 px-4 py-2">
+        <a href="login.html" class="text-white font-semibold underline">Sign In</a>
+      </div>
     </div>
-  </header>
-  <main class="w-full max-w-2xl p-8 bg-white rounded-lg shadow-lg flex flex-col items-center">
-    <section class="mb-8 text-center">
-      <h2 class="text-2xl font-semibold mb-2">Mission</h2>
-      <p class="text-gray-600 mb-4">Empowering researchers and clinicians with state-of-the-art AI for genome analysis and CRISPR-based correction.</p>
-      <a href="upload.html" class="inline-block bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition">Upload Genome / Try Tool</a>
+  </nav>
+  <main class="flex-1 w-full max-w-6xl mx-auto px-4 py-8 flex flex-col items-center">
+    <section class="w-full flex flex-col items-center mb-10">
+      <h2 class="text-3xl font-bold text-blue-800 mb-2 text-center animate__animated animate__fadeInDown">Empowering researchers and clinicians with state-of-the-art AI for genome analysis and CRISPR-based correction.</h2>
+      <p class="text-lg text-blue-700 text-center mb-4">Mission</p>
     </section>
-    <section class="w-full flex flex-col gap-4 mt-8">
-      <a href="mutation_detection_result.html" class="block w-full py-3 px-6 text-center bg-green-600 text-white rounded hover:bg-green-700 transition">Mutation Detection Demo</a>
-      <a href="crispr_correction.html" class="block w-full py-3 px-6 text-center bg-purple-600 text-white rounded hover:bg-purple-700 transition">CRISPR Correction Tool</a>
-      <a href="/docs" class="block w-full py-3 px-6 text-center bg-gray-700 text-white rounded hover:bg-gray-900 transition">API Playground</a>
-      <a href="about.html" class="block w-full py-3 px-6 text-center bg-gray-500 text-white rounded hover:bg-gray-700 transition">About / Docs</a>
-      <a href="login.html" class="block w-full py-3 px-6 text-center bg-blue-400 text-white rounded hover:bg-blue-600 transition">Login / Signup</a>
+    <nav class="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+      <a href="upload.html" class="bg-white border border-blue-200 rounded-lg shadow hover:shadow-lg transition p-6 flex flex-col items-center text-center group">
+        <span class="text-2xl mb-2">📤</span>
+        <span class="font-bold text-blue-700">Upload Genome / Try Tool</span>
+        <span class="text-gray-600 text-sm mt-1">Upload your FASTA file and start analysis instantly.</span>
+      </a>
+      <a href="mutation_detection_result.html" class="bg-white border border-green-200 rounded-lg shadow hover:shadow-lg transition p-6 flex flex-col items-center text-center group">
+        <span class="text-2xl mb-2">🧬</span>
+        <span class="font-bold text-green-700">Mutation Detection Demo</span>
+        <span class="text-gray-600 text-sm mt-1">Run AI-powered mutation detection on your sequence.</span>
+      </a>
+      <a href="crispr_correction.html" class="bg-white border border-purple-200 rounded-lg shadow hover:shadow-lg transition p-6 flex flex-col items-center text-center group">
+        <span class="text-2xl mb-2">🧪</span>
+        <span class="font-bold text-purple-700">CRISPR Correction Tool</span>
+        <span class="text-gray-600 text-sm mt-1">Simulate and visualize CRISPR edits and corrections.</span>
+      </a>
+      <a href="/docs" class="bg-white border border-yellow-200 rounded-lg shadow hover:shadow-lg transition p-6 flex flex-col items-center text-center group" target="_blank">
+        <span class="text-2xl mb-2">🛠️</span>
+        <span class="font-bold text-yellow-700">API Playground</span>
+        <span class="text-gray-600 text-sm mt-1">Explore and test all API endpoints interactively.</span>
+      </a>
+    </nav>
+    <section class="w-full mt-8">
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+        <h3 class="text-xl font-bold text-blue-700 mb-2">BioData Integration</h3>
+        <p class="text-gray-700 mb-2">Search and retrieve gene, protein, and annotation data from major bioinformatics resources directly from GeneFix AI:</p>
+        <ul class="list-disc list-inside text-blue-900 text-sm mb-2">
+          <li><b>NCBI Entrez:</b> <code>/biodata/ncbi_entrez_search</code> (genes, proteins, sequences)</li>
+          <li><b>Ensembl:</b> <code>/biodata/ensembl_gene</code> (gene annotation, comparative genomics)</li>
+          <li><b>UniProt:</b> <code>/biodata/uniprot_search</code> (protein-level information)</li>
+          <li><b>HGNC:</b> <span class="text-gray-600">(gene nomenclature, coming soon)</span></li>
+          <li><b>RefSeq:</b> <span class="text-gray-600">(reference sequences, coming soon)</span></li>
+          <li><b>PDB:</b> <span class="text-gray-600">(protein structures, coming soon)</span></li>
+          <li><b>GeneCards:</b> <span class="text-gray-600">(gene-centric database, coming soon)</span></li>
+          <li><b>OMIM:</b> <span class="text-gray-600">(genetic disorders, coming soon)</span></li>
+        </ul>
+        <div class="text-xs text-blue-800 mt-2">
+          Example: <code>/biodata/ncbi_entrez_search?term=BRCA1&amp;db=gene</code>
+        </div>
+        <!-- Collapsible Search Form -->
+        <button id="biodataToggle" class="mt-4 mb-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">🔍 BioData Search</button>
+        <div id="biodataFormWrap" class="hidden animate__animated animate__fadeIn">
+          <form id="biodataForm" class="flex flex-col sm:flex-row gap-2 items-center mt-2 mb-4">
+            <input type="text" id="biodataQuery" class="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Enter gene/protein (e.g. BRCA1, TP53, P53)..." required />
+            <select id="biodataSource" class="px-2 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <option value="ncbi">NCBI</option>
+              <option value="ensembl">Ensembl</option>
+              <option value="uniprot">UniProt</option>
+              <option value="hgnc">HGNC</option>
+              <option value="refseq">RefSeq</option>
+              <option value="pdb">PDB</option>
+              <option value="genecards">GeneCards</option>
+              <option value="omim">OMIM</option>
+            </select>
+            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Search</button>
+          </form>
+          <div id="biodataLoading" class="hidden text-blue-700 text-sm flex items-center gap-2"><svg class="animate-spin h-5 w-5 text-blue-700" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>Loading...</div>
+          <div id="biodataError" class="hidden text-red-600 text-sm mt-2"></div>
+          <div id="biodataResults" class="mt-4"></div>
+        </div>
+      </div>
     </section>
-    <footer class="mt-8 text-center text-xs text-gray-400">&copy; 2025 GeneFix AI</footer>
   </main>
+  <footer class="w-full bg-blue-800 text-white text-center py-4 mt-8">
+    <span class="text-sm">&copy; 2025 GeneFix AI &mdash; All rights reserved.</span>
+  </footer>
   <script>
-      // Show user profile bar if logged in
-      function showUserProfileBar() {
-        const userId = localStorage.getItem('user_id');
-        const userProfileBar = document.getElementById('userProfileBar');
-        const signInBar = document.getElementById('signInBar');
-        if (userId) {
-          fetch(`/profile/${userId}`)
-            .then(res => res.json())
-            .then(profile => {
-              if (profile && profile.email) {
-                userProfileBar.classList.remove('hidden');
-                signInBar.classList.add('hidden');
-                document.getElementById('userName').textContent = profile.full_name || profile.username || profile.email;
-                // If profile_picture is a valid URL or file, use it; otherwise fallback to avatar.png
-                let photo = profile.profile_picture && profile.profile_picture !== 'undefined' && profile.profile_picture !== '' ? profile.profile_picture : 'avatar.png';
-                // If not a full URL, prepend with local path if needed
-                if (photo && !photo.startsWith('http') && !photo.startsWith('/')) {
-                  photo = './' + photo;
-                }
+    // User profile bar logic for both desktop and mobile
+    function showUserProfileBar() {
+      const userId = localStorage.getItem('user_id');
+      const userProfileBar = document.getElementById('userProfileBar');
+      const signInBar = document.getElementById('signInBar');
+      const userProfileBarMobile = document.getElementById('userProfileBarMobile');
+      const signInBarMobile = document.getElementById('signInBarMobile');
+      if (userId) {
+        fetch(`/profile/${userId}`)
+          .then(res => res.json())
+          .then(profile => {
+            if (profile && profile.email) {
+              userProfileBar.classList.remove('hidden');
+              signInBar.classList.add('hidden');
+              // Desktop
+              document.getElementById('userName').textContent = profile.full_name || profile.username || profile.email;
+              let photo = localStorage.getItem('profile_picture') || profile.profile_picture || '';
+              if (photo && photo !== 'undefined' && photo !== '') {
                 document.getElementById('userPhoto').src = photo;
+                document.getElementById('userPhoto').alt = 'Profile';
+                document.getElementById('userPhoto').style.background = '';
+                document.getElementById('userPhoto').style.color = '';
+                document.getElementById('userPhoto').style.fontWeight = '';
+                document.getElementById('userPhoto').style.fontSize = '';
               } else {
-                userProfileBar.classList.add('hidden');
-                signInBar.classList.remove('hidden');
+                // Show initials if no photo
+                let name = profile.full_name || profile.username || profile.email || '';
+                let initials = name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+                document.getElementById('userPhoto').src = '';
+                document.getElementById('userPhoto').alt = initials;
+                document.getElementById('userPhoto').style.background = '#bfdbfe';
+                document.getElementById('userPhoto').style.color = '#1e40af';
+                document.getElementById('userPhoto').style.display = 'flex';
+                document.getElementById('userPhoto').style.alignItems = 'center';
+                document.getElementById('userPhoto').style.justifyContent = 'center';
+                document.getElementById('userPhoto').style.fontWeight = 'bold';
+                document.getElementById('userPhoto').style.fontSize = '1.2rem';
+                document.getElementById('userPhoto').value = initials;
               }
-            });
-        } else {
-          userProfileBar.classList.add('hidden');
-          signInBar.classList.remove('hidden');
+              // Mobile
+              if (userProfileBarMobile && signInBarMobile) {
+                userProfileBarMobile.classList.remove('hidden');
+                signInBarMobile.classList.add('hidden');
+                document.getElementById('userNameMobile').textContent = profile.full_name || profile.username || profile.email;
+                let photoMobile = localStorage.getItem('profile_picture') || profile.profile_picture || '';
+                if (photoMobile && photoMobile !== 'undefined' && photoMobile !== '') {
+                  document.getElementById('userPhotoMobile').src = photoMobile;
+                  document.getElementById('userPhotoMobile').alt = 'Profile';
+                  document.getElementById('userPhotoMobile').style.background = '';
+                  document.getElementById('userPhotoMobile').style.color = '';
+                  document.getElementById('userPhotoMobile').style.fontWeight = '';
+                  document.getElementById('userPhotoMobile').style.fontSize = '';
+                } else {
+                  let name = profile.full_name || profile.username || profile.email || '';
+                  let initials = name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+                  document.getElementById('userPhotoMobile').src = '';
+                  document.getElementById('userPhotoMobile').alt = initials;
+                  document.getElementById('userPhotoMobile').style.background = '#bfdbfe';
+                  document.getElementById('userPhotoMobile').style.color = '#1e40af';
+                  document.getElementById('userPhotoMobile').style.display = 'flex';
+                  document.getElementById('userPhotoMobile').style.alignItems = 'center';
+                  document.getElementById('userPhotoMobile').style.justifyContent = 'center';
+                  document.getElementById('userPhotoMobile').style.fontWeight = 'bold';
+                  document.getElementById('userPhotoMobile').style.fontSize = '1.2rem';
+                  document.getElementById('userPhotoMobile').value = initials;
+                }
+              }
+            } else {
+              userProfileBar.classList.add('hidden');
+              signInBar.classList.remove('hidden');
+              if (userProfileBarMobile && signInBarMobile) {
+                userProfileBarMobile.classList.add('hidden');
+                signInBarMobile.classList.remove('hidden');
+              }
+            }
+          });
+      } else {
+        userProfileBar.classList.add('hidden');
+        signInBar.classList.remove('hidden');
+        if (userProfileBarMobile && signInBarMobile) {
+          userProfileBarMobile.classList.add('hidden');
+          signInBarMobile.classList.remove('hidden');
         }
       }
-      showUserProfileBar();
-      // Logout button
-      document.getElementById('logoutBtn').onclick = function() {
+    }
+    showUserProfileBar();
+    document.getElementById('logoutBtn').onclick = function() {
+      localStorage.removeItem('user_id');
+      window.location.reload();
+    };
+    const logoutBtnMobile = document.getElementById('logoutBtnMobile');
+    if (logoutBtnMobile) {
+      logoutBtnMobile.onclick = function() {
         localStorage.removeItem('user_id');
         window.location.reload();
       };
-      function isImageData(str) {
-  return (
-    typeof str === 'string' &&
-    (str.startsWith('data:image') || str.startsWith('http://') || str.startsWith('https://'))
-  );
-}
-function getProfileAvatarHTML(profile, size = 32) {
-  let imgSrc = isImageData(profile.profile_picture) ? profile.profile_picture : '';
-  let initials = '';
-  if (!imgSrc) {
-    if (profile.profile_picture && /^[A-Z]{1,3}$/.test(profile.profile_picture)) {
-      initials = profile.profile_picture;
-    } else {
-      let name = profile.full_name || profile.username || profile.email || '';
-      initials = name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
     }
-  }
-  return `<div class="rounded-full flex items-center justify-center bg-blue-200 text-blue-800 font-bold border-2 border-blue-400"
-              style="width:${size}px;height:${size}px;overflow:hidden;">
-    ${imgSrc
-      ? `<img src="${imgSrc}" class="w-full h-full object-cover" alt="${profile.full_name || profile.username || profile.email || 'Profile Picture'}"/>`
-      : `<span style="font-size:${size/2}px;">${initials}</span>`}
-  </div>`;
-}
-// Example usage for nav/profile bar:
-let userId = localStorage.getItem('user_id');
-if (userId && document.getElementById('navProfileAvatar')) {
-  fetch(`/profile/${userId}`)
-    .then(res => res.json())
-    .then(profile => {
-      document.getElementById('navProfileAvatar').innerHTML = getProfileAvatarHTML(profile, 32);
-    });
-}
-    </script>
+    // BioData Integration UI logic
+    const biodataToggle = document.getElementById('biodataToggle');
+    const biodataFormWrap = document.getElementById('biodataFormWrap');
+    biodataToggle.onclick = () => {
+      biodataFormWrap.classList.toggle('hidden');
+      biodataToggle.textContent = biodataFormWrap.classList.contains('hidden') ? '🔍 BioData Search' : '⬆️ Hide BioData Search';
+    };
+    // Advanced BioData search logic
+    document.getElementById('biodataForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const query = document.getElementById('biodataQuery').value.trim();
+      const source = document.getElementById('biodataSource').value;
+      const loading = document.getElementById('biodataLoading');
+      const error = document.getElementById('biodataError');
+      const results = document.getElementById('biodataResults');
+      loading.classList.remove('hidden');
+      error.classList.add('hidden');
+      results.innerHTML = '';
+      let url = '';
+      if (source === 'ncbi') {
+        url = `/biodata/ncbi_entrez_search?term=${encodeURIComponent(query)}&db=gene`;
+      } else if (source === 'ensembl') {
+        url = `/biodata/ensembl_gene?gene=${encodeURIComponent(query)}`;
+      } else if (source === 'uniprot') {
+        url = `/biodata/uniprot_search?query=${encodeURIComponent(query)}`;
+      }
+      // Placeholder for new sources
+      if (["hgnc","refseq","pdb","genecards","omim"].includes(source)) {
+        loading.classList.add('hidden');
+        results.innerHTML = `<div class='text-yellow-700 bg-yellow-50 border border-yellow-200 rounded p-4'>Integration for <b>${source.toUpperCase()}</b> is coming soon!</div>`;
+        return;
+      }
+      try {
+        if (!url) return;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('No results or error from server.');
+        const data = await res.json();
+        loading.classList.add('hidden');
+        // Advanced visualization
+        if (source === 'ncbi') {
+          results.innerHTML = renderNCBIResults(data);
+        } else if (source === 'ensembl') {
+          results.innerHTML = renderEnsemblResults(data);
+        } else if (source === 'uniprot') {
+          results.innerHTML = renderUniProtResults(data);
+        }
+      } catch (err) {
+        loading.classList.add('hidden');
+        error.textContent = err.message || 'Failed to fetch data.';
+        error.classList.remove('hidden');
+      }
+    };
+    // Visualization helpers
+    function renderNCBIResults(data) {
+      if (!data || !data.results || !data.results.length) return '<div class="text-gray-600">No NCBI results found.</div>';
+      return `<div class="mb-2 text-blue-900 font-semibold">NCBI Gene Results (${data.results.length}):</div>` +
+        data.results.map(gene => `
+          <div class="bg-white border border-blue-200 rounded-lg p-4 mb-3 shadow-sm">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div>
+                <div class="font-bold text-blue-700 text-lg">${gene.name || gene.symbol || 'Gene'}</div>
+                <div class="text-sm text-gray-700">${gene.description || ''}</div>
+                <div class="text-xs text-blue-800 mt-1">Gene ID: ${gene.id || gene.gene_id || '-'}</div>
+              </div>
+              <a href="https://www.ncbi.nlm.nih.gov/gene/${gene.id || gene.gene_id}" target="_blank" class="mt-2 md:mt-0 px-3 py-1 bg-blue-100 text-blue-800 rounded text-xs hover:bg-blue-200">View on NCBI</a>
+            </div>
+            <div class="mt-2 text-xs text-gray-600">Organism: ${gene.organism || '-'}</div>
+          </div>
+        `).join('');
+    }
+    function renderEnsemblResults(data) {
+      if (!data || !data.gene) return '<div class="text-gray-600">No Ensembl results found.</div>';
+      const gene = data.gene;
+      return `<div class="mb-2 text-purple-900 font-semibold">Ensembl Gene:</div>
+        <div class="bg-white border border-purple-200 rounded-lg p-4 mb-3 shadow-sm">
+          <div class="font-bold text-purple-700 text-lg">${gene.display_name || gene.id || 'Gene'}</div>
+          <div class="text-sm text-gray-700">${gene.description || ''}</div>
+          <div class="text-xs text-purple-800 mt-1">Gene ID: ${gene.id || '-'}</div>
+          <div class="text-xs text-gray-700">Species: ${gene.species || '-'}</div>
+          <a href="https://www.ensembl.org/id/${gene.id}" target="_blank" class="mt-2 px-3 py-1 bg-purple-100 text-purple-800 rounded text-xs hover:bg-purple-200">View on Ensembl</a>
+        </div>`;
+    }
+    function renderUniProtResults(data) {
+      if (!data || !data.results || !data.results.length) return '<div class="text-gray-600">No UniProt results found.</div>';
+      return `<div class="mb-2 text-green-900 font-semibold">UniProt Protein Results (${data.results.length}):</div>` +
+        data.results.map(protein => {
+          // Try to extract UniProt ID and organism name from common UniProt API response structures
+          let uniprotId = protein.id || protein.primaryAccession || protein.accession || 'N/A';
+          let name = protein.name || (protein.proteinDescription && protein.proteinDescription.recommendedName && protein.proteinDescription.recommendedName.fullName && protein.proteinDescription.recommendedName.fullName.value) || 'Protein';
+          let description = protein.function || protein.description || (protein.proteinDescription && protein.proteinDescription.recommendedName && protein.proteinDescription.recommendedName.fullName && protein.proteinDescription.recommendedName.fullName.value) || '';
+          let organism = 'N/A';
+          if (protein.organism && typeof protein.organism === 'object') {
+            if (protein.organism.scientificName) {
+              organism = protein.organism.scientificName;
+            } else if (protein.organism.taxonName) {
+              organism = protein.organism.taxonName;
+            } else if (protein.organism.name) {
+              organism = protein.organism.name;
+            }
+          } else if (typeof protein.organism === 'string') {
+            organism = protein.organism;
+          }
+          return `
+            <div class="bg-white border border-green-200 rounded-lg p-4 mb-3 shadow-sm">
+              <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                  <div class="font-bold text-green-700 text-lg">${name}</div>
+                  <div class="text-sm text-gray-700">${description}</div>
+                  <div class="text-xs text-green-800 mt-1">UniProt ID: ${uniprotId}</div>
+                </div>
+                <a href="https://www.uniprot.org/uniprotkb/${uniprotId}" target="_blank" class="mt-2 md:mt-0 px-3 py-1 bg-green-100 text-green-800 rounded text-xs hover:bg-green-200">View on UniProt</a>
+              </div>
+              <div class="mt-2 text-xs text-gray-600">Organism: ${organism}</div>
+            </div>
+          `;
+        }).join('');
+    }
+    // Navbar mobile toggle
+    const navbarToggle = document.getElementById('navbarToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (navbarToggle && mobileMenu) {
+      navbarToggle.onclick = () => {
+        mobileMenu.classList.toggle('hidden');
+      };
+      // Optional: close menu on link click
+      mobileMenu.querySelectorAll('a').forEach(link => {
+        link.onclick = () => mobileMenu.classList.add('hidden');
+      });
+    }
+  </script>
 </body>
 </html>

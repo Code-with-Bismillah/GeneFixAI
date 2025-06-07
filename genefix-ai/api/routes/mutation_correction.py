@@ -13,6 +13,10 @@ class CorrectionRequest(BaseModel):
     src: list
     tgt: list
 
+class SuggestCorrectionRequest(BaseModel):
+    sequence: str
+    mutation_pos: int
+
 @router.post("/correct")
 async def correct_mutations(request: CorrectionRequest):
     src = torch.tensor(request.src, dtype=torch.long)
@@ -21,15 +25,14 @@ async def correct_mutations(request: CorrectionRequest):
     return {"corrected": output.argmax(dim=-1).tolist()}
 
 @router.post("/suggest_correction")
-async def suggest_correction(sequence: str, mutation_pos: int):
-    # Suggest gRNA for the mutation
+async def suggest_correction(request: SuggestCorrectionRequest):
+    sequence = request.sequence
+    mutation_pos = request.mutation_pos
     guide_designer = GuideRNA("")
     guides = guide_designer.design(sequence)
-    # Simulate Cas9 correction for the first guide (for demo)
     if not guides:
         raise HTTPException(status_code=404, detail="No valid guides found.")
     corrected_seq = cas9.cut(sequence, guides[0])
-    # Dummy on/off-target scores (replace with real logic)
     on_target_score = 0.95
     off_target_score = 0.05
     return {

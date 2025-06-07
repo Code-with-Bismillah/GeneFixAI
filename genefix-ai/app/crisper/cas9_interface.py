@@ -4,5 +4,10 @@ class Cas9Interface:
         pass
 
     def cut(self, sequence, guide):
-        # Implement Cas9 cutting simulation here
-        return sequence
+        # Simulate Cas9 cut: find guide, cut 3 bases after guide (PAM site)
+        idx = sequence.find(guide)
+        if idx == -1:
+            return sequence  # guide not found, return original
+        cut_site = idx + len(guide)
+        # Remove 3 bases at cut site to simulate DSB
+        return sequence[:cut_site] + sequence[cut_site+3:]

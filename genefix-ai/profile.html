@@ -8,10 +8,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center">
-  <main class="w-full max-w-md p-8 bg-white rounded-lg shadow-lg mt-10">
+  <main class="w-full max-w-md p-4 sm:p-8 bg-white rounded-lg shadow-lg mt-10">
     <h2 class="text-2xl font-bold text-center text-blue-700 mb-6">User Profile</h2>
-    <div id="profile" class="mb-8"></div>
-    <button id="editBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition mb-4">Edit My Profile</button>
+    <div id="profile" class="mb-8 w-full"></div>
+    <button id="editBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition mb-4 w-full sm:w-auto">Edit My Profile</button>
     <div id="editModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
       <div class="bg-white rounded-lg p-6 w-full max-w-lg relative">
         <button id="closeEdit" class="absolute top-2 right-2 text-gray-400 text-2xl">&times;</button>
@@ -32,6 +32,7 @@
       </div>
     </div>
     <a href="index.html" class="block mt-4 text-blue-500 hover:underline">&larr; Back to Home</a>
+    <div id="result" class="mt-4"></div>
   </main>
   <script>
     function isImageData(str) {
@@ -82,55 +83,24 @@
         });
     }
     let currentProfile = null;
-    function renderProfile(profile) {
-      currentProfile = profile;
-      document.getElementById('profile').innerHTML = `<div class='bg-gray-100 rounded p-4 mt-4 text-left inline-block'>
-        ${getProfileAvatarHTML(profile, 80)}
-        <div><b>Name:</b> ${profile.full_name || ''}</div>
-        <div><b>Username:</b> ${profile.username || ''}</div>
-        <div><b>Email:</b> ${profile.email}</div>
-        <div><b>Location:</b> ${profile.country || ''}</div>
-        <div><b>About:</b> ${profile.about || ''}</div>
-        <div class='mt-2'><b>GitHub:</b> <a href='${profile.github || '#'}' target='_blank' class='text-blue-600 underline'>${profile.github || ''}</a></div>
-        <div><b>LinkedIn:</b> <a href='${profile.linkedin || '#'}' target='_blank' class='text-blue-600 underline'>${profile.linkedin || ''}</a></div>
-        <div><b>Twitter:</b> <a href='${profile.twitter || '#'}' target='_blank' class='text-blue-600 underline'>${profile.twitter || ''}</a></div>
-        <div><b>Website:</b> <a href='${profile.website || '#'}' target='_blank' class='text-blue-600 underline'>${profile.website || ''}</a></div>
-      </div>`;
-    }
-    // Fetch and render profile
-    if (!userId) {
-      document.getElementById('profile').innerHTML = '<span class="text-red-600">No user logged in.</span>';
-    } else {
-      fetch(`/profile/${userId}`)
-        .then(res => res.json())
-        .then(profile => {
-          renderProfile(profile);
-          // Pre-fill edit form
-          Object.entries(profile).forEach(([k, v]) => {
-            if(document.querySelector(`#editProfileForm [name='${k}']`))
-              document.querySelector(`#editProfileForm [name='${k}']`).value = v || '';
-          });
-        });
-    }
-    // Edit modal logic
-    document.getElementById('editBtn').onclick = () => {
-      document.getElementById('editModal').classList.remove('hidden');
-    };
-    document.getElementById('closeEdit').onclick = () => {
-      document.getElementById('editModal').classList.add('hidden');
-    };
     // Add profile picture preview and upload in edit modal
-    document.querySelector("#editProfileForm label[for='profile_picture']")?.remove();
+    // Remove any previous profile picture file input to avoid duplicates
+    const oldPicInput = document.querySelector('#editProfileForm input[name="profile_picture_file"]');
+    if (oldPicInput) oldPicInput.parentElement.remove();
+    // Insert new file input for profile picture
     const picLabel = document.createElement('label');
-    picLabel.innerHTML = `Picture <input type="file" name="profile_picture_file" accept="image/*" class="mt-1 block w-full border rounded p-1" />`;
-    document.getElementById('editProfileForm').insertBefore(picLabel, document.getElementById('editProfileForm').querySelector("textarea[name='about']"));
+    picLabel.innerHTML = `Profile Picture <input type="file" name="profile_picture_file" accept="image/*" class="mt-1 block w-full border rounded p-1" />`;
+    const aboutTextarea = document.getElementById('editProfileForm').querySelector("textarea[name='about']");
+    document.getElementById('editProfileForm').insertBefore(picLabel, aboutTextarea);
     // Show preview on file select
     picLabel.querySelector('input[type="file"]').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function(evt) {
-          document.querySelector('#profile img').src = evt.target.result;
+          // If avatar exists, update it; else, update any img in profile
+          const avatarImg = document.querySelector('#profile img');
+          if (avatarImg) avatarImg.src = evt.target.result;
         };
         reader.readAsDataURL(file);
       }
@@ -164,12 +134,75 @@
       });
       if (res.ok) {
         const updated = await res.json();
+        // Update localStorage with new profile picture if present
+        if (updated.profile_picture) {
+          localStorage.setItem('profile_picture', updated.profile_picture);
+        }
         renderProfile(updated);
         document.getElementById('editModal').classList.add('hidden');
+        showAlert('Profile updated!', 'success');
       } else {
-        alert('Failed to update profile.');
+        const errorDetail = (await res.json()).detail || 'Unknown error';
+        alert('Failed to update profile: ' + errorDetail);
+        showAlert('Profile update failed: ' + errorDetail, 'error');
       }
     }
+    // Notification/alert function
+    function showAlert(message, type) {
+      let alert = document.createElement('div');
+      alert.className = `fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg animate__animated animate__fadeInDown ${type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`;
+      alert.innerText = message;
+      document.body.appendChild(alert);
+      setTimeout(() => {
+        alert.classList.add('animate__fadeOutUp');
+        setTimeout(() => alert.remove(), 800);
+      }, 2200);
+    }
+    function renderProfile(profile) {
+      currentProfile = profile;
+      document.getElementById('profile').innerHTML = `<div class='bg-gray-100 rounded p-4 mt-4 text-left inline-block'>
+        ${getProfileAvatarHTML(profile, 80)}
+        <div><b>Name:</b> ${profile.full_name || ''}</div>
+        <div><b>Username:</b> ${profile.username || ''}</div>
+        <div><b>Email:</b> ${profile.email}</div>
+        <div><b>Location:</b> ${profile.country || ''}</div>
+        <div><b>About:</b> ${profile.about || ''}</div>
+        <div class='mt-2'><b>GitHub:</b> ${profile.github ? `<a href='${profile.github}' target='_blank' class='text-blue-600 underline'>${profile.github}</a>` : ''}</div>
+        <div><b>LinkedIn:</b> ${profile.linkedin ? `<a href='${profile.linkedin}' target='_blank' class='text-blue-600 underline'>${profile.linkedin}</a>` : ''}</div>
+        <div><b>Twitter:</b> ${profile.twitter ? `<a href='${profile.twitter}' target='_blank' class='text-blue-600 underline'>${profile.twitter}</a>` : ''}</div>
+        <div><b>Website:</b> ${profile.website ? `<a href='${profile.website}' target='_blank' class='text-blue-600 underline'>${profile.website}</a>` : ''}</div>
+      </div>`;
+    }
+    // Fetch and render profile
+    if (!userId) {
+      document.getElementById('profile').innerHTML = '<span class="text-red-600">No user logged in.</span>';
+    } else {
+      fetch(`/profile/${userId}`)
+        .then(res => res.json())
+        .then(profile => {
+          renderProfile(profile);
+          // Pre-fill edit form
+          Object.entries(profile).forEach(([k, v]) => {
+            if(document.querySelector(`#editProfileForm [name='${k}']`))
+              document.querySelector(`#editProfileForm [name='${k}']`).value = v || '';
+          });
+        });
+    }
+    // Edit modal logic
+    document.getElementById('editBtn').onclick = () => {
+      // Defensive: ensure modal and form are present and visible
+      const modal = document.getElementById('editModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        // Defensive: ensure the form is visible
+        const form = document.getElementById('editProfileForm');
+        if (form) form.style.display = '';
+      }
+    };
+    document.getElementById('closeEdit').onclick = () => {
+      const modal = document.getElementById('editModal');
+      if (modal) modal.classList.add('hidden');
+    };
     // Avatar for navigation/profile bar if present
     if (userId && document.getElementById('navProfileAvatar')) {
       fetch(`/profile/${userId}`)

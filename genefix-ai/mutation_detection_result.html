@@ -12,21 +12,61 @@
   <header class="w-full bg-blue-700 py-6 mb-8 flex flex-col items-center relative">
     <h1 class="text-4xl font-bold text-center text-white">GeneFix AI</h1>
     <p class="text-center text-blue-100 mt-2">AI-powered Genome Mutation Detection & Correction</p>
-    <div id="userProfileBar" class="absolute right-8 top-6 flex items-center gap-3 hidden">
+    <div id="userProfileBar" class="absolute right-4 top-4 flex items-center gap-3 hidden">
       <img id="userPhoto" src="avatar.png" alt="Profile" class="w-10 h-10 rounded-full border-2 border-white object-cover" />
       <span id="userName" class="text-white font-semibold"></span>
       <a href="profile.html" class="text-blue-200 underline text-sm ml-2">Profile</a>
       <button id="logoutBtn" class="ml-2 px-2 py-1 bg-blue-900 text-white rounded text-xs">Logout</button>
     </div>
-    <div id="signInBar" class="absolute right-8 top-6 flex items-center gap-3">
+    <div id="signInBar" class="absolute right-4 top-4 flex items-center gap-3">
       <a href="login.html" class="text-white font-semibold underline">Sign In</a>
     </div>
   </header>
-  <main class="w-full max-w-2xl p-8 bg-white rounded-lg shadow-lg mt-10">
+  <main class="w-full max-w-2xl p-4 sm:p-8 bg-white rounded-lg shadow-lg mt-4 sm:mt-10 flex flex-col items-center">
     <h2 class="text-2xl font-bold text-center text-blue-700 mb-6">Mutation Detection Result</h2>
-    <div id="results" class="mb-8"></div>
+    <form id="fastaForm" class="flex flex-col gap-4 w-full mb-6" enctype="multipart/form-data">
+      <label class="block w-full">
+        <span class="text-gray-700">FASTA File</span>
+        <input type="file" name="file" accept=".fasta,.fa" required class="mt-1 block w-full border rounded p-2" />
+      </label>
+      <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full sm:w-auto">Detect Mutations</button>
+    </form>
+    <div id="results" class="mb-8 w-full"></div>
     <a href="upload.html" class="block mt-8 text-blue-500 hover:underline">&larr; Back to Upload</a>
   </main>
+  <style>
+    @media (max-width: 640px) {
+      header, main {
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+      main {
+        padding: 1rem !important;
+        margin-top: 0 !important;
+      }
+      h1 {
+        font-size: 2rem !important;
+      }
+      h2 {
+        font-size: 1.25rem !important;
+      }
+      #userProfileBar, #signInBar {
+        right: 1rem !important;
+        top: 1rem !important;
+      }
+    }
+    @media (max-width: 400px) {
+      h1 {
+        font-size: 1.25rem !important;
+      }
+      h2 {
+        font-size: 1rem !important;
+      }
+      .p-4, .sm\:p-8 {
+        padding: 0.5rem !important;
+      }
+    }
+  </style>
   <script>
     // Example: fetch and display results (replace with real API call)
     fetch('/mutation_detection/detect_from_fasta')
@@ -112,6 +152,48 @@ if (userId && document.getElementById('navProfileAvatar')) {
     .then(profile => {
       document.getElementById('navProfileAvatar').innerHTML = getProfileAvatarHTML(profile, 32);
     });
+}
+</script>
+<script>
+document.getElementById('fastaForm').onsubmit = async function(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = new FormData(form);
+  const res = await fetch('/mutation_detection/detect_from_fasta', {
+    method: 'POST',
+    body: data
+  });
+  const resultsDiv = document.getElementById('results');
+  if (res.ok) {
+    const json = await res.json();
+    if (json.results && json.results.length > 0) {
+      resultsDiv.innerHTML = json.results.map((r, i) => `
+        <div class='mb-4 p-4 border rounded'>
+          <div class='font-semibold'>Sequence ${i+1}:</div>
+          <div class='break-all text-xs text-gray-700'>${r.sequence}</div>
+          <div class='mt-2'>Mutations: <span class='text-red-600'>${JSON.stringify(r.mutations)}</span></div>
+        </div>
+      `).join('');
+      showAlert('Mutation detection complete!', 'success');
+    } else {
+      resultsDiv.innerHTML = '<span class="text-red-600">No results found.</span>';
+      showAlert('No mutations found.', 'error');
+    }
+  } else {
+    resultsDiv.innerHTML = `<span class='text-red-600'>Error: ${(await res.json()).detail || 'Failed to process.'}</span>`;
+    showAlert('Error processing file.', 'error');
+  }
+}
+// Notification/alert function
+function showAlert(message, type) {
+  let alert = document.createElement('div');
+  alert.className = `fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg animate__animated animate__fadeInDown ${type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`;
+  alert.innerText = message;
+  document.body.appendChild(alert);
+  setTimeout(() => {
+    alert.classList.add('animate__fadeOutUp');
+    setTimeout(() => alert.remove(), 800);
+  }, 2200);
 }
 </script>
 </body>
