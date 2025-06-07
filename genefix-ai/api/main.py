@@ -7,6 +7,7 @@ from app.data_pipeline.genome_parser import GenomeParser
 from pydantic import BaseModel
 import requests
 import os
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 app.include_router(mutation_detection, prefix="/mutation_detection")
@@ -22,9 +23,20 @@ class GuideRequest(BaseModel):
 async def design_guides(request: GuideRequest):
     return {"guides": guide_designer.design(request.target_sequence)}
 
-@app.get("/")
-def serve_index():
-    return FileResponse("./index.html")
+# Serve static files (HTML, CSS, JS) from the current directory
+app.mount("/static", StaticFiles(directory="."), name="static")
+
+# Serve HTML files at root (e.g., /index.html, /upload.html, etc.)
+@app.get("/{filename}", response_class=FileResponse)
+async def serve_html(filename: str):
+    if os.path.exists(filename):
+        return FileResponse(filename)
+    return FileResponse("index.html")
+
+# Serve index.html at root
+@app.get("/", response_class=FileResponse)
+async def root():
+    return FileResponse("index.html")
 
 @app.post("/upload_fasta")
 async def upload_fasta(file: UploadFile = File(...)):
