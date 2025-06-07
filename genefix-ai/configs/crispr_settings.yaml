@@ -1,0 +1,6 @@
+# CRISPR configuration settings for GeneFix AI
+pam_sequence: NGG
+max_guides: 5
+guide_length: 20
+cas9_model: SpCas9
+specificity_threshold: 0.8
