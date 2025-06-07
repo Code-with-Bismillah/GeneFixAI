@@ -19,4 +19,4 @@ async def design_guides(request: GuideRequest):
 
 @app.get("/")
 def serve_index():
-    return FileResponse("index.html")
+    return FileResponse("./index.html")
