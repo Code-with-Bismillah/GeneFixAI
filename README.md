@@ -1,6 +1,9 @@
-# Project: GeneFix AI
+# GeneFix AI
 
 GeneFix AI is a research-level platform for genome mutation detection and correction using deep learning and CRISPR simulation.
+
+<img width="1366" height="1004" alt="genefix-ai" src="https://github.com/user-attachments/assets/4c88e7a1-b518-4be7-8a9c-79f59395af83" />
+
 
 ## Features
 - Modular deep learning models for mutation detection (CNN+LSTM) and correction (Transformer)
